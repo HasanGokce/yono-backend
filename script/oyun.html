@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Oyun Oluştur</title>
+    <!-- Socket.IO kütüphanesini ekleyin -->
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
+   
+</head>
+<body>
+     <!-- Oyun Oluştur Butonu -->
+    <button id="oyunOlusturButonu">Oyun Oluştur</button>
+
+    <!-- Oyuna Katıl Bölümü -->
+    <input type="text" id="oyunaKatilKodu" placeholder="6 Haneli Kod">
+    <button id="oyunaKatilButonu">Oyuna Katıl</button>
+
+    <script>
+        document.getElementById('oyunOlusturButonu').addEventListener('click', function() {
+            oyunOlustur();
+        });
+
+        document.getElementById('oyunaKatilButonu').addEventListener('click', function() {
+            var kod = document.getElementById('oyunaKatilKodu').value;
+            oyunaKatil(kod);
+        });
+    </script>
+     <script src="oyun.js"></script>
+</body>
+</html>
