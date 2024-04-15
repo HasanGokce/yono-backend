@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/app/utils/fetch-api";
-import GameWelcomeView from "@/app/components/views/GameWelcomeView";
+import GameWelcomePage from "@/app/components/pages/GameWelcomePage";
 
 interface Props {
   params: {
@@ -25,6 +25,7 @@ async function fetchGameDetail(filter: string) {
 export default async function GameWelcome(props: Props) {
   const filter = props.params.gameId;
   const { data } = await fetchGameDetail(filter);
-  console.log(data);
-  return <GameWelcomeView gameData={data} />;
+
+  if (!data) return null;
+  return <GameWelcomePage gameData={data} />;
 }
