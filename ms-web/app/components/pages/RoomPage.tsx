@@ -1,30 +1,33 @@
+import Avatar from "../atoms/Avatar";
 import ButtonGame from "../molecules/ButtonGame";
 
 interface RoomPageProps {
-  gameToken: string;
-  userToken: string;
+  gameState: {
+    sharedPlayers: any;
+    questionTitle: string;
+    screenState: string;
+  };
+  handleAnswer: (answer: boolean) => void;
 }
 
 export default function RoomPage(props: RoomPageProps) {
-  const { gameToken, userToken } = props;
+  const { gameState } = props;
+  const { sharedPlayers } = gameState;
+
   return (
     <div>
       <div className=" text-white py-4 px-8 fixed top-0 left-0 w-full z-50 mt-12">
-        <h1>Room state: waitingPlayers</h1>
-        <p>{gameToken}</p>
-        <p>{userToken}</p>
-        <p></p>
+        <div className="flex flex-row">
+          {sharedPlayers &&
+            sharedPlayers.map((player: any) => <Avatar state={""} />)}
+        </div>
       </div>
-
       <div className=" text-white py-4 px-8 fixed inset-x-0 top-1/2 transform -translate-y-1/2 z-40">
-        <p className="text-center text-4xl pt-4">
-          Have you ever sung in the shower and thought you sounded like a
-          rockstar?
-        </p>
+        <p className="text-center text-4xl pt-4">{gameState?.questionTitle}</p>
       </div>
 
       <div className=" text-white py-4 px-8 fixed bottom-0 left-0 w-full z-30">
-        <ButtonGame />
+        <ButtonGame handleAnswer={props.handleAnswer} />
       </div>
     </div>
   );

@@ -16,16 +16,29 @@ export default function Join() {
     socket.on("gameStarted", (data) => {
       console.log("gameStarted", data);
     });
+
+    socket.on("entranceInfo", (data) => {
+      console.log("entranceInfo", data);
+      const { gameToken, userToken, gamePin } = data;
+      push(
+        "/room?gameToken=" +
+          gameToken +
+          "&userToken=" +
+          userToken +
+          "&gamePin=" +
+          gamePin
+      );
+    });
   }, []);
 
   // joinGame fonksiyonu
-  const joinGame = () => {
+  const handleJoinGame = () => {
     console.log("first");
     if (gamePin.length === 6) {
       // 6 haneli kod kontrolü
-      socket.emit("joinGame", gamePin); // Sokete 'joinGame' olayı gönder
+      socket.emit("applyRoom", gamePin); // Sokete 'joinGame' olayı gönder
       console.log(`Trying to join game with PIN: ${gamePin}`);
-      push("/room?gameToken=g100&" + "userToken=u200"); // Oyun PIN kodu ile oyun sayfasına yönlendir
+      // push("/room?gameToken=g100&" + "userToken=u200");
     } else {
       console.log("Please enter a valid 6-digit game PIN.");
     }
@@ -38,7 +51,7 @@ export default function Join() {
           className="rounded p-4 mb-0"
           onSubmit={(e) => {
             e.preventDefault(); // Form gönderimini engelle
-            joinGame(); // joinGame fonksiyonunu çağır
+            handleJoinGame(); // joinGame fonksiyonunu çağır
           }}
         >
           <div className="mb-4">

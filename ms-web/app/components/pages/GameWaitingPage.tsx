@@ -15,7 +15,7 @@ export default function GameWaitingPage(props: GameWaitingProps) {
 
   return (
     <div className="grid gap-2">
-      <Title align="center">gameName</Title>
+      {/* <Title align="center">gameName</Title> */}
       <p className="font-medium text-center">Davet kodu ile oyna:</p>
       <Code className="text-center">{code}</Code>
       <Info>Bu kodu arkadaşınızla paylaşın, oynamaya başlayın!</Info>

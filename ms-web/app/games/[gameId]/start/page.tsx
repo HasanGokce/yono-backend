@@ -9,14 +9,24 @@ import Button from "@/app/components/atoms/Button";
 
 interface Props {
   params: {
-    gameId: string;
+    gamePin: string;
   };
+}
+
+interface GameData {
+  gameToken: string;
+  gamePin: string;
+  userToken: string;
 }
 
 export default function WaitingPage(props: Props) {
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
-  const [gameCode, setGameCode] = useState("");
+  const [gameData, setGameData] = useState<GameData>({
+    gameToken: "",
+    gamePin: "",
+    userToken: "",
+  });
 
   useEffect(() => {
     if (socket.connected) {
@@ -33,12 +43,12 @@ export default function WaitingPage(props: Props) {
         setTransport(transport.name);
       });
 
-      socket.emit("createGame", { gameId: props.params.gameId });
+      socket.emit("createGame", { gameId: props.params.gamePin });
     }
 
     socket.on("gameCreated", (data) => {
       console.log("gameCreated", data);
-      setGameCode(data.gameCode);
+      setGameData(data);
     });
 
     function onDisconnect() {
@@ -68,18 +78,21 @@ export default function WaitingPage(props: Props) {
     },
   ];
 
+  const gameLink = `/room?gameToken=${gameData.gameToken}&userToken=${gameData.userToken}&gamePin=${gameData.gamePin}`;
+
+  const wifi = isConnected ? (
+    <Wifi status="connected" />
+  ) : (
+    <Wifi status="disconnected" />
+  );
+
   return (
     <div>
-      <p>
-        {isConnected ? (
-          <Wifi status="connected" />
-        ) : (
-          <Wifi status="disconnected" />
-        )}
-      </p>
-      <p>Transport: {transport}</p>
-      <GameWaitingPage code={gameCode} />
-      <a href="/room?gameToken=g123&userToken=u123">
+      {wifi}
+      {/* <p>Transport: {transport}</p> */}
+      <GameWaitingPage code={gameData.gamePin} />
+
+      <a href={gameLink}>
         <Button title="Start game"></Button>
       </a>
     </div>

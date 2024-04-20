@@ -1,12 +1,22 @@
 interface Props {
   title: string;
+  style?: string;
 }
 
 export default function Button(props: Props) {
   const title = props.title;
+  let style = props.style;
+
+  if (style !== "primary") {
+    style = "yono-bg-color hover:bg-gray-400 text-gray-800";
+  } else {
+    style = "bg-gray-900 hover:bg-gray-400 text-gray-200";
+  }
 
   return (
-    <button className="mt-2 w-full yono-bg-color hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+    <button
+      className={`mt-2 w-full font-bold py-2 px-4 rounded inline-flex items-center ${style}`}
+    >
       <span>{title}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./globals.scss";
 import { Topbar } from "./components/organisms/Topbar";
 import Image from "next/image";
 
@@ -29,7 +29,7 @@ export default function RootLayout({
             priority={true}
           />
         </div> */}
-        <Topbar  />
+        <Topbar />
         {children}
         {/* <Bottombar /> */}
       </body>

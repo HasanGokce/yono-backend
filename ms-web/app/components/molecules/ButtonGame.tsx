@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-export default function ButtonGame() {
+export default function ButtonGame(props: {
+  handleAnswer: (socket: any) => void;
+}) {
   // Her bir düğme için ayrı durumlar
   const [yesClicked, setYesClicked] = useState(false);
   const [noClicked, setNoClicked] = useState(false);
@@ -11,6 +13,7 @@ export default function ButtonGame() {
       return;
     }
     setYesClicked(true);
+    props.handleAnswer(true);
     console.log("Yes Button clicked");
   };
 
@@ -20,6 +23,7 @@ export default function ButtonGame() {
       return;
     }
     setNoClicked(true);
+    props.handleAnswer(false);
     console.log("No Button clicked");
   };
 
