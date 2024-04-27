@@ -6,6 +6,7 @@ import { socket } from "@/app/utils/socket";
 import GameWaitingPage from "@/app/components/pages/GameWaitingPage";
 import Wifi from "@/app/components/atoms/Wifi";
 import Button from "@/app/components/atoms/Button";
+import Link from "next/link";
 
 interface Props {
   params: {
@@ -92,9 +93,9 @@ export default function WaitingPage(props: Props) {
       {/* <p>Transport: {transport}</p> */}
       <GameWaitingPage code={gameData.gamePin} />
 
-      <a href={gameLink}>
+      <Link href={gameLink}>
         <Button title="Start game"></Button>
-      </a>
+      </Link>
     </div>
   );
 }
