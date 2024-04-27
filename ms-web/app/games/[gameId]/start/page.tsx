@@ -9,7 +9,7 @@ import Button from "@/app/components/atoms/Button";
 
 interface Props {
   params: {
-    gamePin: string;
+    gameId: string;
   };
 }
 
@@ -43,7 +43,7 @@ export default function WaitingPage(props: Props) {
         setTransport(transport.name);
       });
 
-      socket.emit("createGame", { gameId: props.params.gamePin });
+      socket.emit("createGame", { gameId: props.params.gameId });
     }
 
     socket.on("gameCreated", (data) => {

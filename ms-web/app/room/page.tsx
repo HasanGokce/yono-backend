@@ -62,16 +62,22 @@ export default function RoomPageContainer(props: Props) {
   }
 
   if (gameState.screenState === "UNMATCHED") {
-    return <QuestionResultPage result={"unmatched"} />;
+    return (
+      <QuestionResultPage
+        result={"unmatched"}
+        handleNextQuestion={handleNextQuestion}
+      />
+    );
   }
 
   if (gameState.screenState === "FINISHED") {
     return (
       <div>
         <div className="grid align-middle items-center text-center pt-20 pb-20">
-          <div className="text-7xl text font-black">83.56%</div>
+          <div className="text-7xl text font-black">{gameState.matchRatio}</div>
           <div className="text-3xl text font-black text-yellow-600">MATCH</div>
         </div>
+
         <Button title="Add Friend" style="primary"></Button>
         <Button title="Send message" style="secondary"></Button>
       </div>

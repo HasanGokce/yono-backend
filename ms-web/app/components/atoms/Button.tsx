@@ -1,11 +1,13 @@
 interface Props {
   title: string;
   style?: string;
+  disabled?: boolean;
 }
 
 export default function Button(props: Props) {
   const title = props.title;
   let style = props.style;
+  const disabled = props.disabled || false;
 
   if (style !== "primary") {
     style = "yono-bg-color hover:bg-gray-400 text-gray-800";
@@ -13,9 +15,14 @@ export default function Button(props: Props) {
     style = "bg-gray-900 hover:bg-gray-400 text-gray-200";
   }
 
+  if (disabled) {
+    style = "bg-gray-400 text-gray-800 cursor-not-allowed";
+  }
+
   return (
     <button
       className={`mt-2 w-full font-bold py-2 px-4 rounded inline-flex items-center ${style}`}
+      disabled={disabled}
     >
       <span>{title}</span>
       <svg

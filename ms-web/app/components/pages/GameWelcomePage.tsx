@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Button from "../atoms/Button";
 import Title from "../atoms/Title";
+import Link from "next/link";
 
 interface GameInfo {
   id: number;
@@ -19,7 +20,7 @@ interface GameInfo {
 export default function GameWelcomePage(props: { gameData: GameInfo }) {
   const name = props.gameData?.attributes.name;
   const thumbnailUrl = props.gameData?.attributes.thumbnail.data.attributes.url;
-
+  const gameId = props.gameData?.id;
   const imageUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL + thumbnailUrl;
   return (
     <div className="relative flex min-h-screen justify-center overflow-hidden mt-4 pl-2 pr-2">
@@ -30,14 +31,13 @@ export default function GameWelcomePage(props: { gameData: GameInfo }) {
             src={imageUrl}
             // className="shadow-[inset_0_-2px_4px_rgba(0,0,0,0.6)]"
           />
-          <Button title={"Hemen Oyna"} />
-          <Button title={"Arkadaşını Davet Et"} />
+          <Button title={"Play public (Coming Soon!)"} disabled={true} />
+          <Link href={`/games/${gameId}/start`}>
+            <Button title={"Play with your friend"} />
+          </Link>
           <div className="divide-y divide-gray-300/50">
             <div className="space-y-6 py-8 text-base leading-7 text-gray-600">
-              <p>
-                An advanced online playground for Tailwind CSS, including
-                support for things like:
-              </p>
+              <p></p>
             </div>
           </div>
         </div>

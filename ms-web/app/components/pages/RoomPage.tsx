@@ -17,9 +17,11 @@ export default function RoomPage(props: RoomPageProps) {
   return (
     <div>
       <div className=" text-white py-4 px-8 fixed top-0 left-0 w-full z-50 mt-12">
-        <div className="flex flex-row">
+        <div className="">
           {sharedPlayers &&
-            sharedPlayers.map((player: any) => <Avatar state={""} />)}
+            sharedPlayers.map((player: any) => (
+              <Avatar state={player.state} nickName={player.nickName} />
+            ))}
         </div>
       </div>
       <div className=" text-white py-4 px-8 fixed inset-x-0 top-1/2 transform -translate-y-1/2 z-40">
