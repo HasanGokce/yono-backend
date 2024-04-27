@@ -25,6 +25,7 @@ import { GameUtils } from 'src/utils/game-utils';
   cors: {
     origin: '*',
   },
+  path: '/mvp/socket',
 })
 @Injectable()
 export class EventsGateway {
