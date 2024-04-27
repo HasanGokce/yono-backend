@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
 import { Topbar } from "./components/organisms/Topbar";
-import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -37,7 +37,7 @@ export function Topbar() {
             rel="noopener noreferrer"
           >
             <Image
-              src="/yono.svg"
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH}/yono.svg`}
               alt="Vercel Logo"
               className="dark:invert"
               width={100}

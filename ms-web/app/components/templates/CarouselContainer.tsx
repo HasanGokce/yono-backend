@@ -2,7 +2,6 @@ import { ScrollingCarousel } from "@trendyol-js/react-carousel";
 import Image from "next/image";
 
 import CarouselItem from "../organisms/CarouselItem";
-import { getStrapiMedia } from "../../utils/api-helpers";
 
 interface Props {
   title: string;
@@ -12,14 +11,14 @@ interface Props {
 }
 
 export default function CarouselContainer({ title, size, icon, games }: Props) {
-  const iconPath = `/icons/home-${icon}.svg`;
+  const iconPath = `${process.env.NEXT_PUBLIC_BASE_PATH}/icons/home-${icon}.svg`;
 
   return (
     <div className="carousel-container">
       <div className="flex ml-4">
         <Image
           src={iconPath}
-          alt="Vercel Logo"
+          alt="Yono Logo"
           className="dark:invert"
           width={24}
           height={24}
