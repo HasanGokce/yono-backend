@@ -1,0 +1,9 @@
+export enum GameState {
+    INIT = "INIT",
+    PLAYING = "PLAYING",
+    FINISHED = "FINISHED",
+    WAITING_FOR_PLAYERS = "WAITING_FOR_PLAYERS",
+    WAITING_FOR_ANSWERS = "WAITING_FOR_ANSWERS",
+   
+    
+}
