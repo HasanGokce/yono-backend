@@ -20,7 +20,11 @@ export default function RoomPage(props: RoomPageProps) {
         <div className="">
           {sharedPlayers &&
             sharedPlayers.map((player: any) => (
-              <Avatar state={player.state} nickName={player.nickName} />
+              <Avatar
+                state={player.state}
+                nickName={player.nickName}
+                key={player.nickName}
+              />
             ))}
         </div>
       </div>

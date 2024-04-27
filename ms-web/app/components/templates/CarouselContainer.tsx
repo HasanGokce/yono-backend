@@ -34,6 +34,7 @@ export default function CarouselContainer({ title, size, icon, games }: Props) {
         {games &&
           games.map((game: any) => (
             <CarouselItem
+              key={game.id}
               id={game.id}
               title={game.attributes.name}
               size={size}

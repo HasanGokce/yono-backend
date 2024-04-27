@@ -110,6 +110,7 @@ export default function Home() {
       {data.map((category: Category, index: number) => {
         return (
           <CarouselContainer
+            key={category.id}
             title={category.attributes.name}
             size={index === 0 ? "medium" : "small"}
             icon={"star"}
