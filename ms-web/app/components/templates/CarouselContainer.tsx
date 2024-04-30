@@ -35,7 +35,7 @@ export default function CarouselContainer({ title, size, icon, games }: Props) {
             <CarouselItem
               key={game.id}
               id={game.id}
-              title={game.attributes.name}
+              title={game.attributes.title}
               size={size}
               thumbnail={
                 process.env.NEXT_PUBLIC_STRAPI_API_URL +

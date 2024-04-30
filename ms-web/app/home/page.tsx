@@ -17,6 +17,7 @@ interface Category {
   id: number;
   attributes: {
     name: string;
+    title: string;
     games: any;
     description: string;
     slug: string;
@@ -111,7 +112,7 @@ export default function Home() {
         return (
           <CarouselContainer
             key={category.id}
-            title={category.attributes.name}
+            title={category.attributes.title}
             size={index === 0 ? "medium" : "small"}
             icon={"star"}
             games={category.attributes.games.data as any} // Update the type of the games prop
