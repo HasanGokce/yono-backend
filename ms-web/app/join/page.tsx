@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { socket } from "../utils/socket";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Join() {
-  const [gamePin, setGamePin] = useState("");
   const { push } = useRouter();
+  const searchParams = useSearchParams();
+  const pin = searchParams.get("pin");
+  const [gamePin, setGamePin] = useState(pin || "");
+  const [nickName, setNickName] = useState("");
 
   useEffect(() => {
     if (socket.connected) {
@@ -33,7 +36,6 @@ export default function Join() {
 
   // joinGame fonksiyonu
   const handleJoinGame = () => {
-    console.log("first");
     if (gamePin.length === 6) {
       // 6 haneli kod kontrolü
       socket.emit("applyRoom", gamePin); // Sokete 'joinGame' olayı gönder
@@ -60,9 +62,20 @@ export default function Join() {
               id="gamePin"
               type="text"
               placeholder="Game PIN"
-              autoFocus={true}
+              autoFocus={false}
               value={gamePin}
               onChange={(e) => setGamePin(e.target.value)} // Oyun PIN kodunu güncelle
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 font-extrabold focus:outline-none focus:shadow-outline text-center leading-8"
+              id="gamePin"
+              type="text"
+              placeholder="Nickname"
+              autoFocus={true}
+              value={nickName}
+              onChange={(e) => setNickName(e.target.value)} // Oyun PIN kodunu güncelle
             />
           </div>
           <div className="flex items-center justify-between">

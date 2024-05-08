@@ -23,14 +23,14 @@ export default function QuestionResultPage(props: QuestionResultProps) {
   const pulseColor = props.result === "matched" ? "green" : "red";
 
   return (
-    <div className="relative flex min-h-screen justify-center overflow-hidden mt-4 pl-2 pr-2">
-      <div className="relative px-0 pt-0 pb-0 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
-        <div className="mx-auto max-w-md">
-          <Pulse color={pulseColor} text={text}></Pulse>
-          <span onClick={props.handleNextQuestion}>
-            <Button title={"Next"}></Button>
-          </span>
-        </div>
+    <div className="flex flex-col space-y-4 text-white py-4 px-8 fixed top-0 left-0 w-full z-50 mt-12 border-2 h-full">
+      <div className="mx-auto max-w-md border-2">
+        <Pulse color={pulseColor} text={text}></Pulse>
+      </div>
+      <div className=" text-white py-4 px-8 z-30">
+        <span onClick={props.handleNextQuestion}>
+          <Button title={"Next"}></Button>
+        </span>
       </div>
     </div>
   );

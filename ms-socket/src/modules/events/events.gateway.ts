@@ -59,9 +59,9 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(@MessageBody() data: { gamePin: string; gameToken: string, userToken: string }, @ConnectedSocket() client: Socket): void {
+  handleJoinRoom(@MessageBody() data: { gamePin: string; gameToken: string, userToken: string, nickname: string }, @ConnectedSocket() client: Socket): void {
     console.log("@joinRoom")
-    const { gamePin, gameToken, userToken } = data;
+    const { gamePin, gameToken, userToken, nickname = "nickname" } = data;
 
     handleJoinRoom(client, gamePin)
 
@@ -71,14 +71,12 @@ export class EventsGateway {
       const playerRecord = currentGame.players.find(p => p.userToken === userToken);
 
       let role = PlayerRole.PARTICIPANT
-      let nickName = "player2"
       if(playerRecord && playerRecord.role === PlayerRole.INITIATOR) {
         role = PlayerRole.INITIATOR
-        nickName = "player1"
       } 
   
       // For game state management, join the game
-      const player = new Player(Date.now(), userToken, role , nickName);
+      const player = new Player(Date.now(), userToken, role , nickname);
       this.gameManager.joinGame(gameToken, player);
       client.emit("gameState", {...currentGame.sharedState, sharedPlayers: currentGame.sharedPlayers})
       client.emit("gameState", {...currentGame.sharedState, sharedPlayers: currentGame.sharedPlayers})

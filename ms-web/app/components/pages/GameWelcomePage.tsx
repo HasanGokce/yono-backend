@@ -27,12 +27,8 @@ export default function GameWelcomePage(props: { gameData: GameInfo }) {
       <div className="relative px-0 pt-0 pb-0 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
         <div className="mx-auto max-w-md">
           <Title>{name}</Title>
-          <img
-            src={imageUrl}
-            // className="shadow-[inset_0_-2px_4px_rgba(0,0,0,0.6)]"
-          />
-          <Button title={"Play public (Coming Soon!)"} disabled={true} />
-          <Link href={`/games/${gameId}/start`}>
+          <img src={imageUrl} />
+          <Link href={`/games/${gameId}/nickname`}>
             <Button title={"Play with your friend"} />
           </Link>
           <div className="divide-y divide-gray-300/50">

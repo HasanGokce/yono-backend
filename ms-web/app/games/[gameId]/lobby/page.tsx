@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { socket } from "@/app/utils/socket";
-import GameWaitingPage from "@/app/components/pages/GameWaitingPage";
+import LobbyPage from "@/app/components/pages/LobbyPage";
 import Wifi from "@/app/components/atoms/Wifi";
 import Button from "@/app/components/atoms/Button";
 import Link from "next/link";
@@ -11,6 +11,9 @@ import Link from "next/link";
 interface Props {
   params: {
     gameId: string;
+  };
+  searchParams: {
+    nickname: string;
   };
 }
 
@@ -22,12 +25,13 @@ interface GameData {
 
 export default function WaitingPage(props: Props) {
   const [isConnected, setIsConnected] = useState(false);
-  const [transport, setTransport] = useState("N/A");
+  const [_, setTransport] = useState("N/A");
   const [gameData, setGameData] = useState<GameData>({
     gameToken: "",
     gamePin: "",
     userToken: "",
   });
+  const [sharedPlayers, setSharedPlayers] = useState([] as any[]);
 
   useEffect(() => {
     if (socket.connected) {
@@ -44,7 +48,15 @@ export default function WaitingPage(props: Props) {
         setTransport(transport.name);
       });
 
-      socket.emit("createGame", { gameId: props.params.gameId });
+      socket.on("gameState", (data) => {
+        console.log("gameState", data);
+        setSharedPlayers(data.sharedPlayers);
+      });
+
+      socket.emit("createGame", {
+        gameId: props.params.gameId,
+        nickname: props.searchParams.nickname,
+      });
     }
 
     socket.on("gameCreated", (data) => {
@@ -66,19 +78,6 @@ export default function WaitingPage(props: Props) {
     };
   }, []);
 
-  const invitationCode = "234215";
-
-  const players = [
-    {
-      name: "Player 1",
-      id: 1,
-    },
-    {
-      name: "Player 2",
-      id: 2,
-    },
-  ];
-
   const gameLink = `/room?gameToken=${gameData.gameToken}&userToken=${gameData.userToken}&gamePin=${gameData.gamePin}`;
 
   const wifi = isConnected ? (
@@ -89,9 +88,13 @@ export default function WaitingPage(props: Props) {
 
   return (
     <div>
-      {wifi}
+      {/* {wifi} */}
       {/* <p>Transport: {transport}</p> */}
-      <GameWaitingPage code={gameData.gamePin} />
+      <LobbyPage
+        code={gameData.gamePin}
+        nickname={props.searchParams.nickname}
+        players={sharedPlayers || []}
+      />
 
       <Link href={gameLink}>
         <Button title="Start game"></Button>

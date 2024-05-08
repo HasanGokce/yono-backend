@@ -21,7 +21,7 @@ export default function Button(props: Props) {
 
   return (
     <button
-      className={`mt-2 w-full font-bold py-2 px-4 rounded inline-flex items-center ${style}`}
+      className={`rounded-md mt-6 w-full font-bold py-3 px-4 inline-flex items-center bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 ${style}`}
       disabled={disabled}
     >
       <span>{title}</span>
