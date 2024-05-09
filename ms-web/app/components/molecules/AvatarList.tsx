@@ -5,7 +5,7 @@ interface Props {
     avatar: string;
     name: string;
     state: string;
-    nickName: string;
+    nickname: string;
   }[];
 }
 
@@ -21,7 +21,7 @@ export default function AvatarList(props: Props) {
           size="sm"
           alt={user.name}
           state={user.state}
-          nickName={user.nickName}
+          nickname={user.nickname}
         />
       ))}
     </div>
