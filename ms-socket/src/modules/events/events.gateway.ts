@@ -89,11 +89,12 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('applyRoom')
-  handleApplyRoom(@MessageBody() gamePin: string, @ConnectedSocket() client: Socket): void {
-    console.log(gamePin)
+  handleApplyRoom(@MessageBody() data: { gamePin: string;  nickname: string }, @ConnectedSocket() client: Socket): void {
+    const gamePin = data.gamePin;
+    const nickname = data.nickname;
     const game = this.gameManager.games.get(gamePin);
     if(game) {
-      const participant = this.gameManager.createNewParticipant();
+      const participant = this.gameManager.createNewParticipant(nickname);
       this.gameManager.joinGame(gamePin, participant);
       client.emit("entranceInfo", {gamePin: gamePin, gameToken: game.gameToken, userToken: participant.userToken})
       game.gameState = GameState.PLAYING;

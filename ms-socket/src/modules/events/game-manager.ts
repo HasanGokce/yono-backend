@@ -42,8 +42,6 @@ export class GameManager {
             return new Question(index, question.text)
         })
 
-        console.log(questionsFactory)
-
         const game = new Game(gameToken, questionsFactory, new Player(Date.now(), userToken, PlayerRole.INITIATOR, "player1"));
         this.games.set(gamePin, game);
 
@@ -68,8 +66,8 @@ export class GameManager {
         return false;
     }
 
-    createNewParticipant() {
-        return new Player(Date.now(), this.generateGameToken(), PlayerRole.PARTICIPANT, "player2");
+    createNewParticipant(nickname) {
+        return new Player(Date.now(), this.generateGameToken(), PlayerRole.PARTICIPANT, nickname);
     }
 
 
