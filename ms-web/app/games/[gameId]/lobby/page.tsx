@@ -31,7 +31,11 @@ export default function WaitingPage(props: Props) {
     gamePin: "",
     userToken: "",
   });
-  const [sharedPlayers, setSharedPlayers] = useState([] as any[]);
+  const [sharedPlayers, setSharedPlayers] = useState([
+    { nickname: props.searchParams.nickname, level: 0 },
+  ] as any[]);
+
+  console.log(props);
 
   useEffect(() => {
     if (socket.connected) {
@@ -86,6 +90,8 @@ export default function WaitingPage(props: Props) {
     <Wifi status="disconnected" />
   );
 
+  const isDisabled = sharedPlayers.length <= 1 ? true : false;
+
   return (
     <div>
       {/* {wifi} */}
@@ -97,7 +103,7 @@ export default function WaitingPage(props: Props) {
       />
 
       <Link href={gameLink}>
-        <Button title="Start game"></Button>
+        <Button title="Start game" disabled={isDisabled}></Button>
       </Link>
     </div>
   );

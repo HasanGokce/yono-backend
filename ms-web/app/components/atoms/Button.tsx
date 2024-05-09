@@ -10,7 +10,7 @@ export default function Button(props: Props) {
   const disabled = props.disabled || false;
 
   if (style !== "primary") {
-    style = "yono-bg-color hover:bg-gray-400 text-gray-800";
+    style = "bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400";
   } else {
     style = "bg-gray-900 hover:bg-gray-400 text-gray-200";
   }
@@ -21,7 +21,7 @@ export default function Button(props: Props) {
 
   return (
     <button
-      className={`rounded-md mt-6 w-full font-bold py-3 px-4 inline-flex items-center bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 ${style}`}
+      className={`rounded-md mt-6 w-full font-bold py-3 px-4 inline-flex items-center ${style}`}
       disabled={disabled}
     >
       <span>{title}</span>

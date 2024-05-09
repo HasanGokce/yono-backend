@@ -1,11 +1,9 @@
 interface WaitingPlayersProps {
-  players: { nickName: string; level: number }[] | undefined;
+  players: { nickname: string; level: number }[] | undefined;
 }
 
 export default function WaitingPlayers(props: WaitingPlayersProps) {
   let players = props.players || [];
-
-  console.log(players);
 
   return (
     <div className="table-auto text-left bg-slate-800 p-4 rounded-md">
@@ -21,8 +19,8 @@ export default function WaitingPlayers(props: WaitingPlayersProps) {
           <div>Level</div>
         </div>
         {players.map((player) => (
-          <div key={player.nickName} className="flex mt-2">
-            <div className="flex-[2_2_0%] font-black">{player.nickName}</div>
+          <div key={player.nickname} className="flex mt-2">
+            <div className="flex-[2_2_0%] font-black">{player.nickname}</div>
             <div>0</div>
           </div>
         ))}

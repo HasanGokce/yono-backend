@@ -16,7 +16,7 @@ export class Game {
     answers: Map<number, Map<string, boolean>>; // Soru ID'si -> Kullanıcı Token'ı -> Cevap
     gameState: GameState;
     sharedState: SharedState
-    sharedPlayers: { userId: number, nickName: string, state: string}[]
+    sharedPlayers: { userId: number, nickname: string, state: string}[]
 
     constructor(gameToken: string, questions: Question[], gameCreator: Player) {
         this.gameToken = gameToken;
@@ -31,7 +31,7 @@ export class Game {
         this.gameState = GameState.INIT;
         this.sharedState = {
             questionTitle: this.questions[0].text,
-            screenState: ScreenState.QUESTION,
+            screenState: ScreenState.WAITING,
             questionNumber: 0
         }
     }
@@ -40,7 +40,7 @@ export class Game {
         console.log(player)
         this.sharedPlayers.push({
             userId: player.id,
-            nickName: player.nickName,
+            nickname: player.nickname,
             state: "notAnswered"
         });
         this.players.push(player);

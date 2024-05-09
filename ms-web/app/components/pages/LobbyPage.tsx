@@ -7,7 +7,7 @@ import WaitingPlayers from "../organisms/WaitingPlayers";
 interface GameWaitingProps {
   code: string;
   nickname: string;
-  players: { nickName: string; level: number }[] | undefined;
+  players: { nickname: string; level: number }[] | undefined;
 }
 
 export default function LobbyPage(props: GameWaitingProps) {
@@ -15,7 +15,7 @@ export default function LobbyPage(props: GameWaitingProps) {
   // const { SVG } = useQRCode();
   const joinUrl = `${process.env.NEXT_PUBLIC_URL}${process.env.NEXT_PUBLIC_BASE_PATH}/join?pin=${code}`;
 
-  const players = props.players || [{ nickName: props.nickname, level: 1 }];
+  const players = props.players || [];
 
   return (
     <div className="grid gap-2">

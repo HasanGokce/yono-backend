@@ -70,6 +70,10 @@ export default function RoomPageContainer(props: Props) {
     );
   }
 
+  if (gameState.screenState === "WAITING") {
+    return <div>Waiting game creator to start...</div>;
+  }
+
   if (gameState.screenState === "FINISHED") {
     return (
       <div>
@@ -78,8 +82,8 @@ export default function RoomPageContainer(props: Props) {
           <div className="text-3xl text font-black text-yellow-600">MATCH</div>
         </div>
 
-        <Button title="Add Friend" style="primary"></Button>
-        <Button title="Send message" style="secondary"></Button>
+        {/* <Button title="Add Friend..." style="primary"></Button>
+        <Button title="Send message..." style="secondary"></Button> */}
       </div>
     );
   }

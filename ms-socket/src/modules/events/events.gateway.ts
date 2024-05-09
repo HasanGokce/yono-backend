@@ -73,6 +73,7 @@ export class EventsGateway {
       let role = PlayerRole.PARTICIPANT
       if(playerRecord && playerRecord.role === PlayerRole.INITIATOR) {
         role = PlayerRole.INITIATOR
+        currentGame.sharedState.screenState = ScreenState.QUESTION
       } 
   
       // For game state management, join the game
@@ -168,7 +169,7 @@ export class EventsGateway {
       game.sharedPlayers = game.sharedPlayers.map(p => {
         return {
           userId: p.userId,
-          nickName: p.nickName,
+          nickname: p.nickname,
           state: AnswerState.NOT_ANSWERED
         }
       })

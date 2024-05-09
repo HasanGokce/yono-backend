@@ -4,4 +4,5 @@ export enum ScreenState {
     UNMATCHED = "UNMATCHED",
     RESULT = "RESULT",
     FINISHED = "FINISHED",
+    WAITING = "WAITING"
 }
