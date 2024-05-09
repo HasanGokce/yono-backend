@@ -16,7 +16,7 @@ export default function AvatarResultList(props: Props) {
     <div className="">
       <ul className="max-w-md divide-y divide-gray-700 dark:divide-gray-700">
         {users.map((user, index) => (
-          <li className="pb-3 sm:pb-4">
+          <li className="pb-3 sm:pb-4" key={index}>
             <div className="flex items-center space-x-4 rtl:space-x-reverse">
               <div className="flex-shrink-0">
                 <Avatar
