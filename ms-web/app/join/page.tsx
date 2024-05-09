@@ -2,19 +2,14 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { socket } from "../utils/socket";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function Join() {
+export default function Join(props: any) {
   const { push } = useRouter();
-  const searchParams = useSearchParams();
-
-  const [gamePin, setGamePin] = useState("");
-  const [nickName, setNickName] = useState<string>("");
+  const [gamePin, setGamePin] = useState(props.searchParams.pin);
+  const [nickname, setNickname] = useState<string>("");
 
   useEffect(() => {
-    const pin = searchParams.get("pin") || "";
-    setGamePin(pin);
-
     if (socket.connected) {
       console.log("connected");
     }
@@ -41,7 +36,7 @@ export default function Join() {
   const handleJoinGame = () => {
     if (gamePin.length === 6) {
       // 6 haneli kod kontrolü
-      socket.emit("applyRoom", gamePin); // Sokete 'joinGame' olayı gönder
+      socket.emit("applyRoom", { gamePin, nickname }); // Sokete 'joinGame' olayı gönder
       console.log(`Trying to join game with PIN: ${gamePin}`);
       // push("/room?gameToken=g100&" + "userToken=u200");
     } else {
@@ -78,8 +73,8 @@ export default function Join() {
                 type="text"
                 placeholder="Nickname"
                 autoFocus={true}
-                value={nickName}
-                onChange={(e) => setNickName(e.target.value)} // Oyun PIN kodunu güncelle
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)} // Oyun PIN kodunu güncelle
               />
             </div>
             <div className="flex items-center justify-between">
