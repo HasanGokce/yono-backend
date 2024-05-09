@@ -27,7 +27,14 @@ export default function GameWelcomePage(props: { gameData: GameInfo }) {
       <div className="relative px-0 pt-0 pb-0 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
         <div className="mx-auto max-w-md">
           <Title>{name}</Title>
-          <img src={imageUrl} />
+          <Image
+            src={imageUrl}
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ width: "100%", height: "auto" }}
+            alt="Game thumbnail"
+          />
           <Link href={`/games/${gameId}/nickname`}>
             <Button title={"Play with your friend"} />
           </Link>

@@ -2,8 +2,21 @@
 const nextConfig = {
   reactStrictMode: false,
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || "/mvp/web",
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "www.yonoapp.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cat-avatars.vercel.app",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
 };
 

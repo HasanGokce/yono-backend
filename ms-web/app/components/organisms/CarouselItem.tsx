@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { YONO_ROUTES } from "../../utils/constant";
 
 interface Props {
@@ -23,7 +24,14 @@ export default function CarouselItem({
   return (
     <Link href={`${YONO_ROUTES.GAMES}/${id}`}>
       <div className={`carousel-item ${imageSize}`}>
-        <img src={thumbnail} alt="Vercel Logo" />
+        <Image
+          src={thumbnail}
+          width={0}
+          height={0}
+          sizes="100vw"
+          style={{ width: "100%", height: "auto" }}
+          alt="Game thumbnail"
+        />
         <h2 className="text-slate-100 mb-4 text-sm pt-2 font-bold leading-none tracking-tight">
           {title}
         </h2>

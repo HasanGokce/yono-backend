@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface Props {
   src?: string;
   size?: "sm" | "md" | "lg";
@@ -23,7 +25,13 @@ export default function Avatar(props: Props) {
   return (
     <div className="flex mt-2">
       <div className="relative">
-        <img className="w-10 h-10 rounded-full mr-2" src={src} alt="" />
+        <Image
+          src={src}
+          width={30}
+          height={30}
+          alt={nickname}
+          className="w-10 h-10 rounded-full mr-2"
+        />
         <span
           className={`top-0 left-7 absolute  w-3.5 h-3.5 rounded-full ${color}`}
         ></span>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
 const IndexPage: React.FC = () => {
@@ -25,13 +26,13 @@ const IndexPage: React.FC = () => {
     <div>
       {gameData ? (
         <div>
-          <img
-            height={"200px"}
-            width={"200px"}
+          <Image
             src={
               `https://yonoapp.com/cms` +
               gameData.data.attributes.thumbnail.data.attributes.url
             }
+            height={200}
+            width={200}
             alt={gameData.data.attributes.thumbnail.data.attributes.name}
           />
           <h2>{gameData.data.attributes.name}</h2>
