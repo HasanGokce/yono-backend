@@ -101,7 +101,6 @@ export default function WaitingPage(props: Props) {
         nickname={props.searchParams.nickname}
         players={sharedPlayers || []}
       />
-
       <Link href={gameLink}>
         <Button title="Start game" disabled={isDisabled}></Button>
       </Link>

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import RoomPage from "../components/pages/RoomPage";
 import { socket } from "../utils/socket";
 import QuestionResultPage from "../components/pages/QuestionResultPage";
+import WaitingPage from "../games/[gameId]/lobby/page";
+import RoomWaitingPage from "../components/pages/RoomWaitingPage";
 
 interface Props {
   searchParams: {
@@ -56,6 +58,7 @@ export default function RoomPageContainer(props: Props) {
       <QuestionResultPage
         result={"matched"}
         handleNextQuestion={handleNextQuestion}
+        users={gameState.sharedPlayers}
       />
     );
   }
@@ -65,12 +68,13 @@ export default function RoomPageContainer(props: Props) {
       <QuestionResultPage
         result={"unmatched"}
         handleNextQuestion={handleNextQuestion}
+        users={gameState.sharedPlayers}
       />
     );
   }
 
   if (gameState.screenState === "WAITING") {
-    return <div>Waiting game creator to start...</div>;
+    return <RoomWaitingPage gameState={gameState} />;
   }
 
   if (gameState.screenState === "FINISHED") {
