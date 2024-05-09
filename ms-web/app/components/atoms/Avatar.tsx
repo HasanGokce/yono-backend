@@ -4,13 +4,13 @@ interface Props {
   alt?: string;
   className?: string;
   state: string;
-  nickName: string;
+  nickname: string;
 }
 
 export default function Avatar(props: Props) {
-  let { src, size, alt, className, state, nickName } = props;
+  let { src, size, alt, className, state, nickname } = props;
   if (!src) {
-    src = "https://cat-avatars.vercel.app/api/cat?name=" + nickName;
+    src = "https://cat-avatars.vercel.app/api/cat?name=" + nickname;
   }
 
   let color = "";
@@ -28,7 +28,7 @@ export default function Avatar(props: Props) {
           className={`top-0 left-7 absolute  w-3.5 h-3.5 rounded-full ${color}`}
         ></span>
       </div>
-      <div>{nickName}</div>
+      <div>{nickname}</div>
     </div>
   );
 }
