@@ -30,7 +30,7 @@ export class GameManager {
         this.games = new Map();
     }
 
-    async createGame(gameId: string): Promise<GameCreationResponse>  {
+    async createGame(gameId: string, nickname: string): Promise<GameCreationResponse>  {
         const gameToken = this.generateGameToken();
         const gamePin = this.generateGamePin();
         const userToken = this.generateGameToken();
@@ -42,7 +42,7 @@ export class GameManager {
             return new Question(index, question.text)
         })
 
-        const game = new Game(gameToken, questionsFactory, new Player(Date.now(), userToken, PlayerRole.INITIATOR, "player1"));
+        const game = new Game(gameToken, questionsFactory, new Player(Date.now(), userToken, PlayerRole.INITIATOR, nickname));
         this.games.set(gamePin, game);
 
         return {

@@ -109,7 +109,8 @@ export class EventsGateway {
   @SubscribeMessage('createGame')
   async handleCreateGame(@MessageBody() data, @ConnectedSocket() client: Socket): Promise<void> {
     const gameId = data.gameId;
-    const gameCreationResponse = this.gameManager.createGame(gameId);
+    const nickname = data.nickname || "creator";
+    const gameCreationResponse = this.gameManager.createGame(gameId, nickname);
     const { gameToken, gamePin, userToken } = await gameCreationResponse;
     client.emit("gameCreated",{gamePin: gamePin, gameToken: gameToken, userToken})
     client.join(gamePin)
