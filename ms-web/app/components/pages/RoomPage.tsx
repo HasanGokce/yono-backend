@@ -22,8 +22,8 @@ export default function RoomPage(props: RoomPageProps) {
             sharedPlayers.map((player: any) => (
               <Avatar
                 state={player.state}
-                nickName={player.nickName}
-                key={player.nickName}
+                nickname={player.nickname}
+                key={player.nickname}
               />
             ))}
         </div>
