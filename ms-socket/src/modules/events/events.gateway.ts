@@ -79,7 +79,7 @@ export class EventsGateway {
       // For game state management, join the game
       const player = new Player(Date.now(), userToken, role , nickname);
       this.gameManager.joinGame(gameToken, player);
-      client.emit("gameState", {...currentGame.sharedState, sharedPlayers: currentGame.sharedPlayers})
+      this.server.in(gamePin).emit('gameState', { ...currentGame.sharedState, sharedPlayers: currentGame.sharedPlayers });
       client.emit("gameState", {...currentGame.sharedState, sharedPlayers: currentGame.sharedPlayers})
 
     } else {

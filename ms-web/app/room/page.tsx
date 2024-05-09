@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import RoomPage from "../components/pages/RoomPage";
 import { socket } from "../utils/socket";
 import QuestionResultPage from "../components/pages/QuestionResultPage";
-import Button from "../components/atoms/Button";
 
 interface Props {
   searchParams: {
