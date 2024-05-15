@@ -17,6 +17,11 @@ export default function LobbyPage(props: GameWaitingProps) {
 
   const players = props.players || [];
 
+  const copylink = () => {
+    navigator.clipboard.writeText(joinUrl);
+    alert("Link copied to clipboard");
+  };
+
   return (
     <div className="grid gap-2">
       <WaitingPlayers players={players} />
@@ -25,7 +30,10 @@ export default function LobbyPage(props: GameWaitingProps) {
           Share this joining info with other person that you want to play
         </p>
 
-        <div className="flex p-2 mt-2 bg-slate-700 rounded-md">
+        <div
+          className="flex p-2 mt-2 bg-slate-700 rounded-md"
+          onClick={copylink}
+        >
           {joinUrl}
           <svg
             xmlns="http://www.w3.org/2000/svg"
