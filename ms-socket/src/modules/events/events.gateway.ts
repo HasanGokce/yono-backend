@@ -154,17 +154,21 @@ export class EventsGateway {
     @MessageBody() data: any,
     @ConnectedSocket() client: Socket
   ): void {
-    const { gamePin, userToken, answer } = data;
+    const { gamePin, gameToken, userToken, answer } = data;
+    console.log(data);
     const game = this.gameManager.games.get(gamePin);
     if (game) {
       const currentQuestion = game.sharedState.questionNumber;
+      console.log({ currentQuestion });
       game.setAnswer(currentQuestion, userToken, answer);
       const sharedPlayers = game.sharedPlayers;
+      console.log({ sharedPlayers });
       this.server
         .in(gamePin)
         .emit("gameState", { ...game.sharedState, sharedPlayers });
     } else {
       console.log("Game not found");
+      return;
     }
 
     if (game.sharedPlayers.every((p) => p.state === AnswerState.ANSWERED)) {
@@ -172,8 +176,6 @@ export class EventsGateway {
       const currentQuestion = game.sharedState.questionNumber;
       const answers = game.answers.get(currentQuestion);
       const areAnswersSame = areValuesSame(answers);
-      console.log(answers);
-      console.log(areAnswersSame);
       if (areAnswersSame) {
         game.sharedState.screenState = ScreenState.MATCHED;
       } else {
@@ -183,6 +185,8 @@ export class EventsGateway {
         ...game.sharedState,
         sharedPlayers: game.sharedPlayers,
       });
+
+      this.server.in(gamePin).emit("matchResult");
     }
   }
 
@@ -215,7 +219,6 @@ export class EventsGateway {
       game.sharedState.questionTitle =
         game.questions[game.sharedState.questionNumber].text;
 
-      console.log(game.sharedState);
       game.sharedPlayers = game.sharedPlayers.map((p) => {
         return {
           userId: p.userId,
@@ -255,21 +258,16 @@ export class EventsGateway {
 
       console.log("@gameCrated");
 
-      client.emit("gameCreated", {
-        gamePin: gamePin,
-        gameToken: gameToken,
-        userToken,
-      });
-
       const currentGame = this.gameManager.games.get(gamePin);
 
       // Her iki oyuncuyu odaya al
       users.forEach((user) => {
         if (user.socketId) {
           // 1. Add player to game object
+          console.log({ user });
           const player = new Player(
             Date.now(),
-            userToken,
+            user.username,
             PlayerRole.PARTICIPANT,
             user.username
           );
@@ -278,22 +276,29 @@ export class EventsGateway {
           // 2. Add players to room
           console.log("socketid: " + user.socketId);
           this.server.sockets;
-          console.log(this.server.sockets);
           this.server.sockets.socketsJoin(user.socketId);
           const firstUserSocket = this.server.sockets.sockets.get(
             user.socketId
           );
 
           if (firstUserSocket) {
-            firstUserSocket.join(gameToken);
-            console.log(this.server.sockets);
+            console.log("sanki buraya gerek yok gibi.");
+            firstUserSocket.join(gamePin);
           } else {
             console.log("Client socket not found");
           }
+
+          this.server.in(gamePin).emit("gameCreated", {
+            gamePin: gamePin,
+            gameToken: gameToken,
+            userToken: userToken,
+          });
         } else {
           console.log("Socket id not found");
         }
       });
+
+      console.log(currentGame.sharedPlayers);
 
       // Odaya katılan kullanıcıyı odaya al
 
@@ -302,7 +307,7 @@ export class EventsGateway {
       // Oyunun başladığını her iki kullanıcıya bildir
       // Oyunun durumunu her iki kullanıcıya bildir
 
-      this.server.in(gameToken).emit("gameState", {
+      this.server.in(gamePin).emit("gameState", {
         ...this.gameManager.games.get(gamePin).sharedState,
         sharedPlayers: this.gameManager.games.get(gamePin).sharedPlayers,
       });

@@ -76,7 +76,7 @@ export class GameManager {
     return {
       gameToken: gameToken,
       gamePin: gamePin,
-      userToken: "noneedforiusertoken",
+      userToken: this.generateGameToken(),
     };
   }
 
