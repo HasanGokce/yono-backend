@@ -2,7 +2,7 @@ import { User } from "./user";
 
 export class Pool {
   private static instance: Pool;
-  public users = new Map<number, User>();
+  public users = new Map<string, User>();
 
   private constructor() {
     // init

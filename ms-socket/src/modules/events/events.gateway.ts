@@ -327,7 +327,7 @@ export class EventsGateway {
     const decoded: { id: number } = jwtDecode(jwt);
 
     if (decoded.id) {
-      const user = new User(decoded.id, "cancelled");
+      const user = new User(data.id, "cancelled");
       this.gameManager.removeUserFromPool(user);
     } else {
       console.log("Invalid JWT");
