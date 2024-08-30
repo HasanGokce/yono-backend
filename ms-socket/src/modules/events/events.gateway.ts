@@ -240,12 +240,13 @@ export class EventsGateway {
   ): Promise<void> {
     // const jwt = data.jwt;
     const username = data.username;
+    const id = data.id;
 
     // const decoded: { id: number } = jwtDecode(jwt);
 
     // if (!decoded.id) return console.log("Invalid JWT");
 
-    const user = new User(data.id, username, client.id);
+    const user = new User(id, username, client.id);
     const users = await this.gameManager.addUserToPool(user);
 
     // Eşleşme sağlandığında oyun oluşturulur ve oyunun bilgileri döner
