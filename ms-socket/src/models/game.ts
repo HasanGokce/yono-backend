@@ -13,10 +13,10 @@ export class Game {
   gameToken: string;
   players: Player[];
   questions: Question[];
-  answers: Map<number, Map<string, boolean>>; // Soru ID'si -> Kullanıcı Token'ı -> Cevap
+  answers: Map<number, Map<string, string>>; // Soru ID'si -> Kullanıcı Token'ı -> Cevap
   gameState: GameState;
   sharedState: SharedState;
-  sharedPlayers: { userId: number; nickname: string; state: string }[];
+  sharedPlayers: { userId: string; nickname: string; state: string }[];
 
   constructor(gameToken: string, questions: Question[], gameCreator?: Player) {
     this.gameToken = gameToken;
@@ -39,7 +39,6 @@ export class Game {
   }
 
   addPlayer(player: Player) {
-    console.log(player);
     this.sharedPlayers.push({
       userId: player.id,
       nickname: player.nickname,
@@ -48,14 +47,14 @@ export class Game {
     this.players.push(player);
   }
 
-  setAnswer(questionId: number, userToken: string, answer: boolean) {
+  setAnswer(questionId: number, userToken: string, answer: string) {
     const userId = this.players.find((p) => p.userToken === userToken)?.id;
     const questionAnswers = this.answers.get(questionId);
     if (questionAnswers) {
       questionAnswers.set(userToken, answer);
       this.sharedPlayers.find((p) => p.userId === userId).state = "answered";
     } else {
-      console.log("Question not found for id of " + questionId);
+      throw new Error("Question not found");
     }
   }
 

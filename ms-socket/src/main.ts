@@ -1,5 +1,5 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -10,6 +10,6 @@ async function bootstrap() {
   // await redisIoAdapter.connectToRedis();
   // app.useWebSocketAdapter(redisIoAdapter);
   await app.listen(process.env.PORT);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.info(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

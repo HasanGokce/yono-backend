@@ -6,21 +6,12 @@ import { PlayerRole } from "src/enums/player-role";
 import { CmsService } from "../cms/cms.service";
 import { User } from "src/models/user";
 import { Pool } from "src/models/pool";
+import { v6 as uuidv6 } from "uuid";
+import { channel } from "diagnostics_channel";
 
 interface GameCreationResponse {
-  gameToken: string;
-  gamePin: string;
-  userToken: string;
+  channelId: string;
 }
-
-// const questions = [
-//     new Question(0, "Have you ever sailed on a boat?"),
-//     new Question(1, "Have you ever been to Paris?"),
-//     new Question(2, "Have you ever song in the shower like a rockstar?"),
-//     new Question(3, "What is the capital of Italy?"),
-//     new Question(4, "What is the capital of Spain?"),
-//     new Question(5, "What is the capital of Portugal?")
-// ];
 
 @Injectable()
 export class GameManager {
@@ -49,35 +40,37 @@ export class GameManager {
     const game = new Game(
       gameToken,
       questionsFactory,
-      new Player(Date.now(), userToken, PlayerRole.INITIATOR, nickname)
+      new Player(userToken, userToken, PlayerRole.INITIATOR, nickname)
     );
     this.games.set(gamePin, game);
 
     return {
-      gameToken: gameToken,
-      gamePin: gamePin,
-      userToken: userToken,
+      channelId: "notimplemented",
     };
   }
 
   async createBlindGame(): Promise<GameCreationResponse> {
-    const gameToken = this.generateGameToken();
-    const gamePin = this.generateGamePin();
+    const channelId = this.generateChannelId();
 
-    const questions = await this.cmsService.getGameQuestions("14");
+    // get random topic
+    const topic = await this.cmsService.getRandomTopic();
 
-    const questionsFactory: Question[] = questions.map((question, index) => {
-      return new Question(index, question.text);
-    });
+    const questions = await this.cmsService.getGameQuestions(topic);
 
-    const game = new Game(gameToken, questionsFactory);
-    this.games.set(gamePin, game);
+    if (questions.length > 0) {
+      const questionsFactory: Question[] = questions.map((question, index) => {
+        return new Question(index, question.text);
+      });
 
-    return {
-      gameToken: gameToken,
-      gamePin: gamePin,
-      userToken: this.generateGameToken(),
-    };
+      const game = new Game(channelId, questionsFactory);
+      this.games.set(channelId, game);
+
+      return {
+        channelId: channelId,
+      };
+    } else {
+      console.warn("No questions found for the topic");
+    }
   }
 
   joinGame(gameToken: string, player: Player) {
@@ -96,7 +89,7 @@ export class GameManager {
 
   createNewParticipant(nickname) {
     return new Player(
-      Date.now(),
+      nickname,
       this.generateGameToken(),
       PlayerRole.PARTICIPANT,
       nickname
@@ -107,15 +100,21 @@ export class GameManager {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
+  private generateChannelId(): string {
+    return uuidv6();
+  }
+
   private generateGamePin(): string {
     return String(Math.floor(100000 + Math.random() * 900000));
   }
 
   async addUserToPool(user: User): Promise<User[]> {
     const result = await this.pool.addUser(user);
-    console.log(result);
-    console.log(this.pool);
     return result;
+  }
+
+  async getUserById(user: User): Promise<User> {
+    return this.pool.getUser(user);
   }
 
   removeUserFromPool(user: User) {

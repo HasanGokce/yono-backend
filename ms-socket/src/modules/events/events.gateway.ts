@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
@@ -6,22 +7,22 @@ import {
   WebSocketServer,
   WsResponse,
 } from "@nestjs/websockets";
+import { jwtDecode } from "jwt-decode";
 import { from, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Server, Socket } from "socket.io";
 
-import { GameManager } from "./game-manager";
-import { Player } from "../../models/player";
-import { GameState } from "src/enums/game-state";
-import { ScreenState } from "src/enums/screen-state";
+import { createAnswerDto, initGameRequestDto } from "src/domain/init";
 import { AnswerState } from "src/enums/answer-state";
+import { GameState } from "src/enums/game-state";
 import { PlayerRole } from "src/enums/player-role";
-import { areValuesSame } from "src/utils/are-values-same";
-import { Injectable } from "@nestjs/common";
-import { CmsService } from "../cms/cms.service";
-import { GameUtils } from "src/utils/game-utils";
-import { jwtDecode } from "jwt-decode";
+import { ScreenState } from "src/enums/screen-state";
 import { User } from "src/models/user";
+import { areValuesSame } from "src/utils/are-values-same";
+import { GameUtils } from "src/utils/game-utils";
+import { Player } from "../../models/player";
+import { CmsService } from "../cms/cms.service";
+import { GameManager } from "./game-manager";
 
 @WebSocketGateway({
   cors: {
@@ -45,9 +46,7 @@ export class EventsGateway {
     this.gameManager = new GameManager(this.cmsService);
   }
 
-  handleConnection(client: Socket): void {
-    console.log(`Client connected: ${client.id}`);
-  }
+  handleConnection(client: Socket): void {}
 
   @SubscribeMessage("events")
   findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
@@ -72,7 +71,6 @@ export class EventsGateway {
     },
     @ConnectedSocket() client: Socket
   ): void {
-    console.log("@joinRoom");
     const { gamePin, gameToken, userToken, nickname = "nickname" } = data;
 
     handleJoinRoom(client, gamePin);
@@ -91,7 +89,7 @@ export class EventsGateway {
       }
 
       // For game state management, join the game
-      const player = new Player(Date.now(), userToken, role, nickname);
+      const player = new Player("id", userToken, role, nickname);
       this.gameManager.joinGame(gameToken, player);
       this.server.in(gamePin).emit("gameState", {
         ...currentGame.sharedState,
@@ -102,7 +100,6 @@ export class EventsGateway {
         sharedPlayers: currentGame.sharedPlayers,
       });
     } else {
-      console.log("@joinRoom Game not found");
     }
   }
 
@@ -128,7 +125,6 @@ export class EventsGateway {
         sharedPlayers: game.sharedPlayers,
       });
     } else {
-      console.log("Game not found");
     }
   }
 
@@ -140,13 +136,11 @@ export class EventsGateway {
     const gameId = data.gameId;
     const nickname = data.nickname || "creator";
     const gameCreationResponse = this.gameManager.createGame(gameId, nickname);
-    const { gameToken, gamePin, userToken } = await gameCreationResponse;
+    const { channelId } = await gameCreationResponse;
     client.emit("gameCreated", {
-      gamePin: gamePin,
-      gameToken: gameToken,
-      userToken,
+      channelId,
     });
-    client.join(gamePin);
+    client.join(channelId);
   }
 
   @SubscribeMessage("questionAnswered")
@@ -154,21 +148,31 @@ export class EventsGateway {
     @MessageBody() data: any,
     @ConnectedSocket() client: Socket
   ): void {
-    const { gamePin, gameToken, userToken, answer } = data;
-    console.log(data);
-    const game = this.gameManager.games.get(gamePin);
+    const createAnswerRequest: createAnswerDto = {
+      userId: data.id,
+      channelId: data.channelId,
+      answer: data.answer,
+    };
+
+    console.log({ createAnswerRequest });
+
+    const { userId, channelId, answer } = createAnswerRequest;
+
+    const game = this.gameManager.games.get(channelId);
+
     if (game) {
       const currentQuestion = game.sharedState.questionNumber;
-      console.log({ currentQuestion });
-      game.setAnswer(currentQuestion, userToken, answer);
+      game.setAnswer(currentQuestion, userId, answer);
+
       const sharedPlayers = game.sharedPlayers;
-      console.log({ sharedPlayers });
-      this.server
-        .in(gamePin)
-        .emit("gameState", { ...game.sharedState, sharedPlayers });
+
+      const lastState = { ...game.sharedState, sharedPlayers };
+
+      console.log({ lastState });
+
+      this.server.in(channelId).emit("gameState", lastState);
     } else {
-      console.log("Game not found");
-      return;
+      throw new Error("Game not found");
     }
 
     if (game.sharedPlayers.every((p) => p.state === AnswerState.ANSWERED)) {
@@ -181,12 +185,12 @@ export class EventsGateway {
       } else {
         game.sharedState.screenState = ScreenState.UNMATCHED;
       }
-      this.server.in(gamePin).emit("gameState", {
+      this.server.in(channelId).emit("gameState", {
         ...game.sharedState,
         sharedPlayers: game.sharedPlayers,
       });
 
-      this.server.in(gamePin).emit("matchResult");
+      this.server.in(channelId).emit("matchResult");
     }
   }
 
@@ -195,8 +199,8 @@ export class EventsGateway {
     @MessageBody() data: any,
     @ConnectedSocket() client: Socket
   ): void {
-    const { gamePin } = data;
-    const game = this.gameManager.games.get(gamePin);
+    const { channelId } = data;
+    const game = this.gameManager.games.get(channelId);
 
     const questionsEnded =
       game.sharedState.questionNumber === game.questions.length - 1;
@@ -205,7 +209,7 @@ export class EventsGateway {
       game.sharedState.screenState = ScreenState.FINISHED;
 
       const matchRatio = GameUtils.maptoMatchRatio(game.answers);
-      this.server.in(gamePin).emit("gameState", {
+      this.server.in(channelId).emit("gameState", {
         ...game.sharedState,
         sharedPlayers: game.sharedPlayers,
         matchRatio,
@@ -226,7 +230,7 @@ export class EventsGateway {
           state: AnswerState.NOT_ANSWERED,
         };
       });
-      this.server.in(gamePin).emit("gameState", {
+      this.server.in(channelId).emit("gameState", {
         ...game.sharedState,
         sharedPlayers: game.sharedPlayers,
       });
@@ -238,82 +242,87 @@ export class EventsGateway {
     @MessageBody() data,
     @ConnectedSocket() client: Socket
   ): Promise<void> {
-    // const jwt = data.jwt;
-    const username = data.username;
-    const id = data.id;
+    const initGameRequest: initGameRequestDto = {
+      id: data.id,
+      gameType: data.gameType,
+      name: data.username,
+      code: data?.code,
+    };
 
-    // const decoded: { id: number } = jwtDecode(jwt);
+    if (!initGameRequest?.code && initGameRequest?.gameType === "blind") {
+      const user = new User(
+        initGameRequest.id,
+        initGameRequest.name,
+        client.id
+      );
 
-    // if (!decoded.id) return console.log("Invalid JWT");
+      // Check if user already in pool otherwise add to pool
+      const userInPool = this.gameManager.pool.users.get(user.id);
+      if (userInPool) return;
+      const users = await this.gameManager.addUserToPool(user);
 
-    const user = new User(id, username, client.id);
-    const users = await this.gameManager.addUserToPool(user);
+      console.log(users);
 
-    // Eşleşme sağlandığında oyun oluşturulur ve oyunun bilgileri döner
-    // İki user dönerse eşleşme sağlanmış demektir
+      if (users.length > 1) {
+        const { channelId } = await this.gameManager.createBlindGame();
 
-    // Tek user dönerse eşleşme sağlanmamış demektir
-    if (users.length > 1) {
-      const gameCreationResponse = await this.gameManager.createBlindGame();
-      const { gameToken, gamePin, userToken } = gameCreationResponse;
+        const currentGame = this.gameManager.games.get(channelId);
 
-      console.log("@gameCrated");
+        // Her iki oyuncuyu odaya al
+        users.forEach((user) => {
+          if (user.socketId) {
+            console.log({ user });
+            // 1. Add player to game object
+            const player = new Player(
+              user.id,
+              user.id,
+              PlayerRole.PARTICIPANT,
+              user.username
+            );
+            currentGame.addPlayer(player);
 
-      const currentGame = this.gameManager.games.get(gamePin);
+            // 2. Add players to room
+            this.server.sockets;
+            this.server.sockets.socketsJoin(user.socketId);
+            const firstUserSocket = this.server.sockets.sockets.get(
+              user.socketId
+            );
 
-      // Her iki oyuncuyu odaya al
-      users.forEach((user) => {
-        if (user.socketId) {
-          // 1. Add player to game object
-          console.log({ user });
-          const player = new Player(
-            Date.now(),
-            user.username,
-            PlayerRole.PARTICIPANT,
-            user.username
-          );
-          currentGame.addPlayer(player);
+            if (firstUserSocket) {
+              firstUserSocket.join(channelId);
+            } else {
+              console.warn("Client socket not found");
+            }
 
-          // 2. Add players to room
-          console.log("socketid: " + user.socketId);
-          this.server.sockets;
-          this.server.sockets.socketsJoin(user.socketId);
-          const firstUserSocket = this.server.sockets.sockets.get(
-            user.socketId
-          );
-
-          if (firstUserSocket) {
-            console.log("sanki buraya gerek yok gibi.");
-            firstUserSocket.join(gamePin);
+            this.server.in(channelId).emit("gameCreated", {
+              channelId,
+            });
           } else {
-            console.log("Client socket not found");
+            console.warn("Socket id not found");
           }
+        });
 
-          this.server.in(gamePin).emit("gameCreated", {
-            gamePin: gamePin,
-            gameToken: gameToken,
-            userToken: userToken,
-          });
-        } else {
-          console.log("Socket id not found");
-        }
-      });
-
-      console.log(currentGame.sharedPlayers);
-
-      // Odaya katılan kullanıcıyı odaya al
-
-      // Her iki kullanıcıyı da odaya al
-      // Oyunu başlat
-      // Oyunun başladığını her iki kullanıcıya bildir
-      // Oyunun durumunu her iki kullanıcıya bildir
-
-      this.server.in(gamePin).emit("gameState", {
-        ...this.gameManager.games.get(gamePin).sharedState,
-        sharedPlayers: this.gameManager.games.get(gamePin).sharedPlayers,
-      });
+        this.server.in(channelId).emit("gameState", {
+          ...this.gameManager.games.get(channelId).sharedState,
+          sharedPlayers: this.gameManager.games.get(channelId).sharedPlayers,
+        });
+      } else {
+        console.info("@waiting-for-other-players");
+      }
+    } else if (
+      // Private room create
+      initGameRequest?.code &&
+      initGameRequest?.gameType === "private"
+    ) {
+      return null;
+    } else if (
+      // Pricate room attend
+      !initGameRequest?.code &&
+      initGameRequest?.gameType === "private"
+    ) {
+      return null;
     } else {
-      console.log("Waiting for another player");
+      throw new Error("Invalid game type");
     }
   }
 
@@ -322,7 +331,6 @@ export class EventsGateway {
     @MessageBody() data,
     @ConnectedSocket() client: Socket
   ): Promise<void> {
-    console.log("@server leavePool");
     const jwt = data.jwt;
 
     const decoded: { id: number } = jwtDecode(jwt);
@@ -331,14 +339,11 @@ export class EventsGateway {
       const user = new User(data.id, "cancelled");
       this.gameManager.removeUserFromPool(user);
     } else {
-      console.log("Invalid JWT");
+      console.warn("Invalid JWT");
     }
-
-    console.log(this.gameManager.pool.getUsers());
   }
 }
 
 const handleJoinRoom = (client, roomName) => {
-  console.log("@joinRoom called for " + roomName);
   client.join(roomName);
 };

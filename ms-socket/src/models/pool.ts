@@ -20,6 +20,7 @@ export class Pool {
   }
 
   public async addUser(user: User): Promise<User[]> {
+    console.log(this.users);
     if (this.users.size > 0) {
       const existingUser = this.users.values().next().value;
       return this.matchUsers(existingUser, user);
@@ -30,7 +31,6 @@ export class Pool {
   }
 
   public matchUsers(user1: User, user2: User): User[] {
-    console.log(`Users matched: ${user1.id} and ${user2.id}`);
     // Eşleşme işlemleri burada yapılabilir
     this.users.delete(user1.id);
     this.users.delete(user2.id);

@@ -18,7 +18,6 @@ describe("Pool", () => {
     await pool.addUser(user);
     await pool.addUser(user);
     await pool.addUser(user);
-    console.log(pool.users);
     expect(pool.users.has(user.id)).toBe(true);
   });
 
