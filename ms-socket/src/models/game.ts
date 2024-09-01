@@ -1,7 +1,7 @@
-import { GameState } from "src/enums/game-state";
+import { GameState } from "@src/enums/game-state";
 import { Player } from "./player";
 import { Question } from "./question";
-import { ScreenState } from "src/enums/screen-state";
+import { ScreenState } from "@src/enums/screen-state";
 
 interface SharedState {
   questionTitle: string;

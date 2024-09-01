@@ -1,8 +1,8 @@
-export enum ScreenState {
-    QUESTION = "QUESTION",
-    MATCHED = "MATCHED",
-    UNMATCHED = "UNMATCHED",
-    RESULT = "RESULT",
-    FINISHED = "FINISHED",
-    WAITING = "WAITING"
+export const enum ScreenState {
+  QUESTION = "QUESTION",
+  MATCHED = "MATCHED",
+  UNMATCHED = "UNMATCHED",
+  RESULT = "RESULT",
+  FINISHED = "FINISHED",
+  WAITING = "WAITING",
 }

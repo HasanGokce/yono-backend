@@ -12,17 +12,18 @@ import { from, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Server, Socket } from "socket.io";
 
-import { createAnswerDto, initGameRequestDto } from "src/domain/init";
-import { AnswerState } from "src/enums/answer-state";
-import { GameState } from "src/enums/game-state";
-import { PlayerRole } from "src/enums/player-role";
-import { ScreenState } from "src/enums/screen-state";
-import { User } from "src/models/user";
-import { areValuesSame } from "src/utils/are-values-same";
-import { GameUtils } from "src/utils/game-utils";
+import { createAnswerDto, initGameRequestDto } from "@src/domain/init";
+import { AnswerState } from "@src/enums/answer-state";
+import { GameState } from "@src/enums/game-state";
+import { PlayerRole } from "@src/enums/player-role";
+import { ScreenState } from "@src/enums/screen-state";
+import { User } from "@src/models/user";
+import { areValuesSame } from "@src/utils/are-values-same";
+import { GameUtils } from "@src/utils/game-utils";
 import { Player } from "../../models/player";
 import { CmsService } from "../cms/cms.service";
 import { GameManager } from "./game-manager";
+import { saveMatchResult } from "@src/services/match";
 
 @WebSocketGateway({
   cors: {
@@ -214,6 +215,14 @@ export class EventsGateway {
         sharedPlayers: game.sharedPlayers,
         matchRatio,
       });
+
+      // send result to db
+      saveMatchResult({
+        match_rate: Number(matchRatio),
+        participants: game.sharedPlayers.map((p) => p.userId),
+        topic_id: "07b1a847-ce12-4235-b49b-8cbafb6c20e3",
+      });
+
       return;
     }
 

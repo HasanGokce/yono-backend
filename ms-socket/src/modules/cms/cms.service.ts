@@ -1,9 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { CMS_API_ENDPOINTS } from "src/constants/cms";
-import { Question } from "src/models/question";
+import { CMS_API_ENDPOINTS } from "@src/constants/cms";
+import { Question } from "@src/models/question";
+import axios from "axios";
 
 @Injectable()
 export class CmsService {
