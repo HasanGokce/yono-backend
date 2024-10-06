@@ -1,36 +1,57 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from "@nestjs/websockets";
 import { jwtDecode } from "jwt-decode";
-import { from, Observable } from "rxjs";
-import { map } from "rxjs/operators";
 import { Server, Socket } from "socket.io";
 
-import { createAnswerDto, initGameRequestDto } from "@src/domain/init";
-import { AnswerState } from "@src/enums/answer-state";
-import { GameState } from "@src/enums/game-state";
-import { PlayerRole } from "@src/enums/player-role";
-import { ScreenState } from "@src/enums/screen-state";
+import {
+  createAnswerDto,
+  initGameRequestDto,
+} from "@src/common/interfaces/init";
+import { AnswerState } from "@src/common/enums/answer-state";
+import { GameState } from "@src/common/enums/game-state";
+import { PlayerRole } from "@src/common/enums/player-role";
+import { ScreenState } from "@src/common/enums/screen-state";
 import { User } from "@src/models/user";
-import { areValuesSame } from "@src/utils/are-values-same";
-import { GameUtils } from "@src/utils/game-utils";
-import { Player } from "../../models/player";
-import { CmsService } from "../cms/cms.service";
+import { areValuesSame } from "@src/common/utils/are-values-same";
+import { GameUtils } from "@src/common/utils/game-utils";
+import { Player } from "@src/models/player";
+import { CmsService } from "@src/cms/cms.service";
 import { GameManager } from "./game-manager";
 import { saveMatchResult } from "@src/services/match";
 
-@WebSocketGateway({
+interface JoinRoomParams {
+  gamePin: string;
+  gameToken: string;
+  userToken: string;
+  nickname: string;
+}
+
+const DEFAULT_NICKNAME = "nickname";
+const SOCKET_PATH = "/mvp/socket";
+
+const gatewayOptions = {
   cors: {
     origin: "*",
   },
-  path: "/mvp/socket",
-})
+  path: SOCKET_PATH,
+};
+
+/**
+ * EventsGateway
+ *
+ * This class is responsible for handling all the events that are emitted from the client side.
+ * Managing game sessions (create, join, leave).
+ * Handling player states and roles.
+ * Emitting game states.
+ * Managing socket connections.
+ */
+@WebSocketGateway(gatewayOptions)
 @Injectable()
 export class EventsGateway {
   @WebSocketServer()
@@ -47,61 +68,67 @@ export class EventsGateway {
     this.gameManager = new GameManager(this.cmsService);
   }
 
-  handleConnection(client: Socket): void {}
-
-  @SubscribeMessage("events")
-  findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: "events", data: item }))
-    );
-  }
-
-  @SubscribeMessage("identity")
-  async identity(@MessageBody() data: number): Promise<number> {
-    return data;
-  }
-
   @SubscribeMessage("joinRoom")
   handleJoinRoom(
     @MessageBody()
-    data: {
-      gamePin: string;
-      gameToken: string;
-      userToken: string;
-      nickname: string;
-    },
+    data: JoinRoomParams,
     @ConnectedSocket() client: Socket
   ): void {
-    const { gamePin, gameToken, userToken, nickname = "nickname" } = data;
+    const { gamePin, gameToken, userToken, nickname = DEFAULT_NICKNAME } = data;
 
-    handleJoinRoom(client, gamePin);
+    client.join(gamePin);
 
     const currentGame = this.gameManager.games.get(gamePin);
 
-    if (currentGame) {
-      const playerRecord = currentGame.players.find(
-        (p) => p.userToken === userToken
-      );
-
-      let role = PlayerRole.PARTICIPANT;
-      if (playerRecord && playerRecord.role === PlayerRole.INITIATOR) {
-        role = PlayerRole.INITIATOR;
-        currentGame.sharedState.screenState = ScreenState.QUESTION;
-      }
-
-      // For game state management, join the game
-      const player = new Player("id", userToken, role, nickname);
-      this.gameManager.joinGame(gameToken, player);
-      this.server.in(gamePin).emit("gameState", {
-        ...currentGame.sharedState,
-        sharedPlayers: currentGame.sharedPlayers,
-      });
-      client.emit("gameState", {
-        ...currentGame.sharedState,
-        sharedPlayers: currentGame.sharedPlayers,
-      });
-    } else {
+    if (!currentGame) {
+      client.emit("error", { message: "Game not found" });
+      return;
     }
+
+    const playerRole = this.getPlayerRole(currentGame, userToken);
+
+    this.addPlayerToGame(
+      currentGame,
+      gameToken,
+      userToken,
+      nickname,
+      playerRole
+    );
+
+    this.updateGameState(client, gamePin, currentGame);
+  }
+
+  private getPlayerRole(game: any, userToken: string) {
+    const playerRecord = game.players.find((p) => p.userToken === userToken);
+
+    let role = PlayerRole.PARTICIPANT;
+    if (playerRecord && playerRecord.role === PlayerRole.INITIATOR) {
+      role = PlayerRole.INITIATOR;
+      game.sharedState.screenState = ScreenState.QUESTION;
+    }
+    return role;
+  }
+
+  private addPlayerToGame(
+    game: any,
+    gameToken: string,
+    userToken: string,
+    nickname: string,
+    role: PlayerRole
+  ): void {
+    const player = new Player("id", userToken, role, nickname);
+    this.gameManager.joinGame(gameToken, player);
+  }
+
+  private updateGameState(client: Socket, gamePin: string, game: any): void {
+    this.server.in(gamePin).emit("gameState", {
+      ...game.sharedState,
+      sharedPlayers: game.sharedPlayers,
+    });
+    client.emit("gameState", {
+      ...game.sharedState,
+      sharedPlayers: game.sharedPlayers,
+    });
   }
 
   @SubscribeMessage("applyRoom")
@@ -258,80 +285,19 @@ export class EventsGateway {
       code: data?.code,
     };
 
+    // Check for missing required properties
+    if (
+      !initGameRequest.id ||
+      !initGameRequest.gameType ||
+      !initGameRequest.name
+    ) {
+      throw new BadRequestException("Missing required fields");
+    }
+
     if (!initGameRequest?.code && initGameRequest?.gameType === "blind") {
-      const user = new User(
-        initGameRequest.id,
-        initGameRequest.name,
-        client.id
-      );
-
-      // Check if user already in pool otherwise add to pool
-      const userInPool = this.gameManager.pool.users.get(user.id);
-      if (userInPool) return;
-      const users = await this.gameManager.addUserToPool(user);
-
-      console.log(users);
-
-      if (users.length > 1) {
-        const { channelId } = await this.gameManager.createBlindGame();
-
-        const currentGame = this.gameManager.games.get(channelId);
-
-        // Her iki oyuncuyu odaya al
-        users.forEach((user) => {
-          if (user.socketId) {
-            console.log({ user });
-            // 1. Add player to game object
-            const player = new Player(
-              user.id,
-              user.id,
-              PlayerRole.PARTICIPANT,
-              user.username
-            );
-            currentGame.addPlayer(player);
-
-            // 2. Add players to room
-            this.server.sockets;
-            this.server.sockets.socketsJoin(user.socketId);
-            const firstUserSocket = this.server.sockets.sockets.get(
-              user.socketId
-            );
-
-            if (firstUserSocket) {
-              firstUserSocket.join(channelId);
-            } else {
-              console.warn("Client socket not found");
-            }
-
-            this.server.in(channelId).emit("gameCreated", {
-              channelId,
-            });
-          } else {
-            console.warn("Socket id not found");
-          }
-        });
-
-        this.server.in(channelId).emit("gameState", {
-          ...this.gameManager.games.get(channelId).sharedState,
-          sharedPlayers: this.gameManager.games.get(channelId).sharedPlayers,
-        });
-      } else {
-        console.info("@waiting-for-other-players");
-      }
-    } else if (
-      // Private room create
-      initGameRequest?.code &&
-      initGameRequest?.gameType === "private"
-    ) {
-      return null;
-    } else if (
-      // Pricate room attend
-      !initGameRequest?.code &&
-      initGameRequest?.gameType === "private"
-    ) {
-      return null;
+      this.handleBlindGame(initGameRequest, client);
     } else {
-      throw new Error("Invalid game type");
+      throw new BadRequestException("Invalid game type");
     }
   }
 
@@ -351,8 +317,65 @@ export class EventsGateway {
       console.warn("Invalid JWT");
     }
   }
-}
 
-const handleJoinRoom = (client, roomName) => {
-  client.join(roomName);
-};
+  private async handleBlindGame(
+    initGameRequest: initGameRequestDto,
+    client: Socket
+  ) {
+    const user = new User(initGameRequest.id, initGameRequest.name, client.id);
+
+    // Check if user already in pool otherwise add to pool
+    const userInPool = this.gameManager.pool.users.get(user.id);
+    if (userInPool) return;
+    const users = await this.gameManager.addUserToPool(user);
+
+    console.log(users);
+
+    if (users.length > 1) {
+      const { channelId } = await this.gameManager.createBlindGame();
+
+      const currentGame = this.gameManager.games.get(channelId);
+
+      // Her iki oyuncuyu odaya al
+      users.forEach((user) => {
+        if (user.socketId) {
+          console.log({ user });
+          // 1. Add player to game object
+          const player = new Player(
+            user.id,
+            user.id,
+            PlayerRole.PARTICIPANT,
+            user.username
+          );
+          currentGame.addPlayer(player);
+
+          // 2. Add players to room
+          this.server.sockets;
+          this.server.sockets.socketsJoin(user.socketId);
+          const firstUserSocket = this.server.sockets.sockets.get(
+            user.socketId
+          );
+
+          if (firstUserSocket) {
+            firstUserSocket.join(channelId);
+          } else {
+            console.warn("Client socket not found");
+          }
+
+          this.server.in(channelId).emit("gameCreated", {
+            channelId,
+          });
+        } else {
+          console.warn("Socket id not found");
+        }
+      });
+
+      this.server.in(channelId).emit("gameState", {
+        ...this.gameManager.games.get(channelId).sharedState,
+        sharedPlayers: this.gameManager.games.get(channelId).sharedPlayers,
+      });
+    } else {
+      console.info("@waiting-for-other-players");
+    }
+  }
+}

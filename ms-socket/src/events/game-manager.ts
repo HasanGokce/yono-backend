@@ -1,13 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { Game } from "../../models/game";
-import { Player } from "../../models/player";
-import { Question } from "../../models/question";
-import { PlayerRole } from "@src/enums/player-role";
-import { CmsService } from "../cms/cms.service";
+import { Game } from "@src/models/game";
+import { Player } from "@src/models/player";
+import { Question } from "@src/models/question";
+import { PlayerRole } from "@src/common/enums/player-role";
+import { CmsService } from "@src/cms/cms.service";
 import { User } from "@src/models/user";
 import { Pool } from "@src/models/pool";
 import { v6 as uuidv6 } from "uuid";
-import { channel } from "diagnostics_channel";
 
 interface GameCreationResponse {
   channelId: string;
